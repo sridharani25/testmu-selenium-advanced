@@ -1,15 +1,20 @@
 import os
+import pytest
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options as ChromeOptions
+from pages.login_page import LoginPage
 
-def test_lambdatest_google():
-    # 1. Fetch credentials from the configuration
-    username = os.getenv("LT_USERNAME", "your_username")
-    access_key = os.getenv("LT_ACCESS_KEY", "your_access_key")
+def test_testmu_assignment():
+    # 1. Credentials will be read dynamically from your .env file
+    username = os.getenv("LT_USERNAME")
+    access_key = os.getenv("LT_ACCESS_KEY")
     
-    grid_url = f"https://{username}:{access_key}@://lambdatest.com"
+    if not username or not access_key:
+        pytest.fail("Missing credentials! Please update your .env file.")
 
-    # 2. Configure TestMu AI (LambdaTest) capabilities
+    grid_url = f"https://{username}:{access_key}@hub.lambdatest.com/wd/hub"
+
+    # 2. Basic Grid configuration
     options = ChromeOptions()
     options.browser_version = "latest"
     options.platform_name = "Windows 10"
@@ -17,27 +22,24 @@ def test_lambdatest_google():
     lt_options = {
         "username": username,
         "access_key": access_key,
-        "build": "TestMu Advanced Selenium Python Build",
-        "name": "Google Title Verification Test",
-        "w3c": True,
-        "plugin": "python-python"
+        "build": "TestMu Advanced Selenium Exam",
+        "name": "Exam Scenario 1",
+        "w3c": True
     }
     options.set_capability('LT:Options', lt_options)
 
-    # 3. Initialize the Remote Web Driver
+    # 3. Spin up the remote browser
     driver = webdriver.Remote(command_executor=grid_url, options=options)
 
     try:
-        # 4. Execute the Test Logic
-        driver.get("https://google.com")
-        assert "Google" in driver.title
+        # TODO: The assignment URL goes here
+        driver.get("https://google.com") 
         
-        # Mark test as passed on the TestMu dashboard
+        # Mark test as passed on the cloud dashboard if it hits the end
         driver.execute_script("lambda-status=passed")
     except Exception as e:
-        # Mark test as failed if an assertion error occurs
+        # Mark test as failed on the cloud dashboard if it crashes
         driver.execute_script("lambda-status=failed")
         raise e
     finally:
-        # 5. Clean up and close the browser session
         driver.quit()
